@@ -40,7 +40,7 @@ BACKUPS = ROOT / "Backups"
 WIN = sys.platform == "win32"
 
 # ── feste Versionen (so wie auf dem Shadow PC getestet) ──
-REPO_URL = "https://github.com/Lohrey/musik-machen.git"
+REPO_URL = "https://github.com/Lohrey/music.git"
 YUE2_TAG = "yue2-v0.1.6"
 YUE2_GIT = "https://github.com/multimodal-art-projection/YuE"
 ACE_COMMIT = "ca1e85fe9430179831e6bc6be790c332190a3866"
@@ -114,8 +114,11 @@ def git() -> str | None:
         return found
     if WIN:
         for cand in (Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Git" / "cmd" / "git.exe",
+                     Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Git" / "cmd" / "git.exe",
                      Path.home() / "AppData" / "Local" / "Programs" / "Git" / "cmd" / "git.exe"):
             if cand.is_file():
+                # frisch per winget installiert: dieses Fenster kennt den PATH noch nicht
+                os.environ["PATH"] = str(cand.parent) + os.pathsep + os.environ.get("PATH", "")
                 return str(cand)
     return None
 
@@ -263,11 +266,19 @@ def install_main(g: dict) -> None:
     if not py(env).is_file():
         run([u, "venv", env, "--python", "3.10", "--seed"])
     p = py(env)
-    yue2 = (f"yue2-infer @ git+{YUE2_GIT}@{YUE2_TAG}" if git()
-            else f"yue2-infer @ {YUE2_GIT}/archive/refs/tags/{YUE2_TAG}.zip")
-    run([u, "pip", "install", "--python", p, "-e", f"{APP}[gguf]", yue2,
-         "yt-dlp[default]", "imageio-ffmpeg", "pyngrok",
-         "--overrides", APP / "overrides" / "linux.txt"], env={"GIT_TERMINAL_PROMPT": "0"})
+    # YuE2 als ZIP-Archiv: braucht kein Git (sonst: "Git executable not found").
+    # Fällt auf git zurück, falls der ZIP-Download scheitert.
+    sources = [os.environ.get("MUSIK_YUE2_URL") or f"{YUE2_GIT}/archive/refs/tags/{YUE2_TAG}.zip"]
+    if git():
+        sources.append(f"git+{YUE2_GIT}@{YUE2_TAG}")
+    for i, src in enumerate(sources):
+        r = run([u, "pip", "install", "--python", p, "-e", f"{APP}[gguf]", f"yue2-infer @ {src}",
+                 "yt-dlp[default]", "imageio-ffmpeg", "pyngrok",
+                 "--overrides", APP / "overrides" / "linux.txt"],
+                env={"GIT_TERMINAL_PROMPT": "0"}, check=i == len(sources) - 1)
+        if r.returncode == 0:
+            break
+        warn("Download fehlgeschlagen – versuche anderen Weg …")
     check = run([p, "-c", "from pathlib import Path; import gradio; p=Path(gradio.__file__).parent/"
                  "'templates'/'frontend'/'index.html'; assert p.is_file(), p"], check=False, quiet=True)
     if check.returncode != 0:
@@ -295,7 +306,9 @@ def install_main(g: dict) -> None:
         warn("Keine NVIDIA-Grafikkarte gefunden – die App läuft dann nur sehr langsam (CPU).")
 
     say("YuE2-GGUF-Motor (für Karten unter 16 GB) …")
-    r = run([p, "-m", "yue2_groove.gguf_engine", "install", "--tag", "latest"], cwd=APP, check=False)
+    r = run([p, "-m", "yue2_groove.gguf_engine", "install", "--tag", "v1.0.3"], cwd=APP, check=False)
+    if r.returncode != 0:
+        r = run([p, "-m", "yue2_groove.gguf_engine", "install", "--tag", "latest"], cwd=APP, check=False)
     if r.returncode == 0:
         ok("GGUF-Motor installiert")
     else:
@@ -321,6 +334,9 @@ def install_sheetsage(g: dict) -> None:
         run([p, "-c", "from huggingface_hub import snapshot_download; "
              f"snapshot_download('m-a-p/SheetSage2', local_dir=r'{models}')"])
     run([u, "pip", "install", "--python", p, "-r", models / "requirements.txt"])
+    if (g.get("name") or not WIN) and "+cu" not in out([p, "-c", "import torch;print(torch.__version__)"]):
+        run([u, "pip", "install", "--python", p, "torch==2.8.0", "torchaudio==2.8.0", "--force-reinstall",
+             "--no-deps", "--index-url", "https://download.pytorch.org/whl/cu126"])
     run([p, "-c", "import json; from huggingface_hub import snapshot_download; "
          f"c=json.load(open(r'{models / 'config.json'}', encoding='utf-8')); "
          "snapshot_download(c['base_model_name_or_path'], revision=c['base_model_revision'])"])
@@ -339,12 +355,19 @@ def install_ace(g: dict) -> None:
     say("ACE-Step 1.5 (alle Sprachen, schnell) …")
     u = uv()
     if not (ACE / "acestep").is_dir():
-        g_exe = git()
-        if g_exe:
+        if ACE.exists():
+            shutil.rmtree(ACE, ignore_errors=True)
+        # ZIP statt git clone: klappt auch ohne Git
+        try:
+            download_zip(os.environ.get("MUSIK_ACE_ZIP") or f"{ACE_GIT}/archive/{ACE_COMMIT}.zip", ACE)
+        except Exception as exc:  # noqa: BLE001
+            g_exe = git()
+            if not g_exe:
+                die(f"ACE-Step konnte nicht geladen werden ({exc}). Internet prüfen und neu starten.")
+            warn(f"ZIP-Download fehlgeschlagen ({exc}) – nehme git")
+            shutil.rmtree(ACE, ignore_errors=True)
             run([g_exe, "clone", ACE_GIT, ACE])
             run([g_exe, "checkout", "-q", ACE_COMMIT], cwd=ACE)
-        else:
-            download_zip(f"{ACE_GIT}/archive/{ACE_COMMIT}.zip", ACE)
     p = py(ACE / ".venv")
     stamp = ACE / ".venv" / "musik-machen-commit.txt"
     if not p.is_file() or not stamp.is_file() or stamp.read_text().strip() != ACE_COMMIT:
@@ -397,6 +420,19 @@ def desktop_shortcut() -> None:
         ok("Verknüpfung „Musik machen“ auf dem Desktop angelegt")
 
 
+def windows_prereqs() -> None:
+    """Microsoft-VC++-Laufzeit (braucht PyTorch) und Git (nur für Updates)."""
+    sys32 = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+    if not (sys32 / "vcruntime140_1.dll").is_file() and shutil.which("winget"):
+        say("Microsoft Visual C++ Laufzeit wird installiert …")
+        run(["winget", "install", "--id", "Microsoft.VCRedist.2015+.x64", "-e", "--silent",
+             "--accept-package-agreements", "--accept-source-agreements"], check=False)
+    ensure_git()
+    if len(str(ROOT)) > 60:
+        warn(f"Langer Ordnerpfad ({ROOT}). Falls etwas mit 'Dateiname zu lang' scheitert: "
+             "Ordner nach C:\\MusikMachen verschieben und neu starten.")
+
+
 def cmd_install(args) -> None:
     t0 = time.time()
     print("=" * 64)
@@ -409,7 +445,7 @@ def cmd_install(args) -> None:
             warn("Unter 8 GB: YuE2 läuft nicht, ACE-Step im Sparmodus.")
     ensure_settings(interactive=not args.yes)
     if WIN:
-        ensure_git()
+        windows_prereqs()
     install_main(g)
     if not args.skip_models:
         install_yue_models()
