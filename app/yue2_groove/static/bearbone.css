@@ -1,0 +1,640 @@
+/* Bearbone DS v0.2 — the static part of the stylesheet.  The palette variables and
+   the bright scene are generated in webui.py and joined in front of / behind this
+   file (see BEARBONE_CSS); the container query for the tab strip rides in the head
+   (LAYOUT_HEAD_CSS).  Rules for the outer frame must stay top-level, never in an
+   @media: see the note at the top of the file. */
+/* ── the outer frame ─────────────────────────────────────────────────────
+   Gradio 6 rewrites this stylesheet (prefix_css): a top-level rule is emitted
+   twice, as written and prefixed with `.gradio-container.gradio-container-X
+   .contain`, but a rule inside @media / @container keeps ONLY the prefixed
+   copy.  So anything outside <main class="contain"> (html, body, gradio-app,
+   .gradio-container, .main.app) can be styled from here only by top-level
+   rules: a phone @media on .gradio-container silently never matches.  The
+   frame therefore scales with clamp() instead of a breakpoint.  Desktop keeps
+   its 42 / 22 / 24px (26 + Gradio's 16 top, 8 + 16 bottom); a 390px phone
+   gets 22 / 12 / 16px. */
+.gradio-container {
+  width: 100% !important;   /* keep the frame stable when the settings rail is hidden */
+  max-width: 1400px !important;
+  margin: 0 auto !important;
+  padding: clamp(22px, 3vw, 42px) clamp(10px, 3vw, 22px) clamp(16px, 2vw, 24px) !important;
+  position: relative !important;
+  font-family: "Berkeley Mono", "Sarasa Mono SC", "JetBrains Mono", "SF Mono",
+               ui-monospace, Menlo, monospace !important;
+}
+/* Gradio's own frame inside ours: `.app` pads 16px 32px at every width (32px
+   a side is a third of a phone) and, without fill_width, caps the content at
+   640 / 768 / 1024 / 1280px steps (iPad landscape got 1024 - 64 = 960px).
+   fill_width=True on the Blocks removes the cap; the padding folds into the
+   clamp() above so the frame has one set of margins. */
+.gradio-container .main.app { padding: 0 !important; }
+html, body, .gradio-container, gradio-app {
+  background: var(--bb-field) !important;
+  color: var(--bb-ink) !important;
+}
+/* iOS "smart zoom": a double tap (tap a field, tap again for the Paste callout)
+   zooms the block and never zooms back.  `manipulation` keeps pan and pinch and
+   drops only the double-tap zoom.  Top-level on purpose: body is outside
+   <main class="contain"> (see the outer-frame note above). */
+body { touch-action: manipulation; }
+/* hide Gradio's own footer / API link */
+footer, #footer, .built-with, .show-api, .api-links { display: none !important; }
+/* header top-right controls: settings-rail toggle + scene switch */
+#bb-topbtns {
+  position: absolute !important; top: 46px; right: 42px;
+  width: auto !important; display: flex !important; align-items: center;
+  gap: 8px; z-index: 60;
+}
+#bb-topbtns > * { width: auto !important; flex: 0 0 auto !important; }
+/* theme toggle: a CSS-drawn icon button, same grammar as the rail toggle.
+   Dark scene shows a crescent moon, the bright scene a ring-and-rays sun;
+   both are 1px currentColor strokes with no background dependency. */
+#bb-theme-btn {
+  position: relative; width: 28px !important; height: 28px; min-width: 28px !important;
+  padding: 0 !important; color: var(--bb-ink3) !important; line-height: 1;
+}
+#bb-theme-btn:hover { color: var(--bb-ink) !important; }
+/* Gradio 6 scopes custom CSS to `.gradio-container... .contain <selector>`, so a
+   scene class on <html> cannot win against the scoped base rule. The JS toggles
+   `bb-bright` on the button itself, which keeps the variant selector scope-safe. */
+#bb-theme-btn::before {
+  content: ""; position: absolute; left: 8px; top: 8px; width: 12px; height: 12px;
+  border-radius: 50%;
+  box-shadow: inset -3px -1px 0 0 currentColor;   /* crescent moon */
+}
+#bb-theme-btn.bb-bright::before {
+  left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px;
+  border: 1px solid currentColor;
+  box-shadow: 0 -8px 0 -5px currentColor, 0 8px 0 -5px currentColor,
+              -8px 0 0 -5px currentColor, 8px 0 0 -5px currentColor;
+}
+/* settings-rail toggle: a CSS-drawn sidebar icon */
+#bb-rail-btn {
+  position: relative; width: 28px !important; height: 28px; min-width: 28px !important;
+  padding: 0 !important; color: var(--bb-ink3) !important; line-height: 1;
+}
+#bb-rail-btn:hover { color: var(--bb-ink) !important; }
+#bb-rail-btn.bb-on { color: var(--bb-ink) !important; }
+#bb-rail-btn::before {
+  content: ""; position: absolute; left: 8px; top: 8px; width: 12px; height: 12px;
+  border: 1px solid currentColor; border-radius: 2px;
+}
+#bb-rail-btn::after {
+  content: ""; position: absolute; left: 12px; top: 9px; width: 1px; height: 10px;
+  background: currentColor;
+}
+#bb-rail-btn.bb-on::after { left: 13px; width: 6px; }
+/* the settings rail starts collapsed so the workspace gets the width */
+html.bb-rail-hidden #bb-rail { display: none !important; }
+/* header */
+#bb-header {
+  border: 1px solid var(--bb-line); border-radius: 12px; background: var(--bb-panel);
+  padding: 22px 26px 20px; margin-bottom: 16px;
+}
+#bb-header .bb-eyebrow {
+  font-size: 11px; letter-spacing: .2em; color: var(--bb-ink3); text-transform: uppercase;
+}
+#bb-header h1 {
+  margin: 12px 0 10px; font-size: 24px; line-height: 1.25; font-weight: 600;
+  letter-spacing: .05em; color: var(--bb-ink);
+}
+#bb-header h1 .bb-slash { color: var(--bb-ink4); padding: 0 8px; }
+#bb-header .bb-meta { font-size: 11.5px; letter-spacing: .08em; color: var(--bb-ink3); text-transform: uppercase; }
+/* ops footer */
+#bb-footer {
+  border-top: 1px solid var(--bb-line); margin-top: 24px; padding: 12px 2px 4px;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 18px;
+  font-size: 11px; letter-spacing: .12em; color: var(--bb-ink3); text-transform: uppercase;
+}
+/* tabs (Gradio 6 dropped .tab-nav; target the real markup) */
+.tabs .tab-container[role="tablist"] > button,
+.tabs .overflow-menu > button {
+  font: inherit !important; font-size: 11.5px !important; letter-spacing: .12em !important;
+  text-transform: uppercase !important; color: var(--bb-ink3) !important;
+  background: transparent !important; border: none !important;
+  border-bottom: 1px solid transparent !important; border-radius: 0 !important;
+  padding: 10px 14px !important;
+}
+.tabs .tab-container[role="tablist"] > button:hover,
+.tabs .overflow-menu > button:hover { color: var(--bb-ink2) !important; }
+.tabs .tab-container[role="tablist"] > button.selected {
+  color: var(--bb-ink) !important; border-bottom: 1px solid var(--bb-ink) !important;
+}
+/* panels / accordions */
+.block, .form, .panel, details, .accordion { border-radius: 10px !important; }
+details, .accordion { border: 1px solid var(--bb-line) !important; background: var(--bb-panel) !important; }
+.label-wrap { text-transform: uppercase !important; letter-spacing: .14em !important; font-size: 11px !important; }
+/* component labels (must not match the text span of radio/checkbox chips, which is a different label > span) */
+span[data-testid="block-info"], .block-title, label > span.label-text {
+  text-transform: uppercase; letter-spacing: .12em; font-size: 10.5px !important; color: var(--bb-ink3) !important;
+}
+/* inputs */
+input, textarea, select { font-family: inherit !important; letter-spacing: .01em; }
+/* upload drop zones (Audio / File): a hint, not a headline.  Gradio ships these
+   at 16px text and a 27px icon, the only text in the UI above the 13px body. */
+[data-testid="upload-text"] { font-size: 12px !important; line-height: 1.5 !important; }
+[data-testid="upload-text"] .or { font-size: 11px !important; }
+[data-testid="upload-icon"] { width: 24px !important; height: 24px !important; }
+[data-testid="upload-icon"] svg { width: 20px !important; height: 20px !important; }
+input:focus, textarea:focus, select:focus {
+  border-color: var(--bb-line2) !important; box-shadow: none !important; outline: none !important;
+}
+*:focus, *:focus-visible { box-shadow: none !important; outline: none !important; }
+/* buttons: Bearbone ops scale (11–12px, wide tracking) instead of Gradio's
+   16px display scale.  Primary is the only filled action; alternatives are
+   outline; utilities are quiet and content-width. */
+button.lg {
+  height: 34px !important; min-height: 34px !important; padding: 0 18px !important;
+  font-size: 12px !important; font-weight: 600 !important; letter-spacing: .14em !important;
+  text-transform: uppercase !important; border-radius: 8px !important;
+  white-space: nowrap !important;
+}
+button.sm {
+  height: 27px !important; min-height: 27px !important; padding: 0 10px !important;
+  font-size: 11px !important; font-weight: 500 !important; letter-spacing: .10em !important;
+  text-transform: uppercase !important; border-radius: 8px !important;
+  white-space: nowrap !important;
+}
+button.primary { text-transform: uppercase !important; letter-spacing: .14em !important; }
+button.primary:hover { background: var(--bb-primary-bg-hover) !important; }
+button.stop { text-transform: uppercase !important; }
+/* an action bar: one filled focus, lighter alternatives, a ghost escape */
+.bb-actionbar { align-items: center !important; gap: 8px !important; flex-wrap: nowrap !important; }
+.bb-actionbar > * { flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; }
+.bb-actionbar .bb-push-right { margin-left: auto !important; }
+.bb-actionbar button.sm.secondary,
+button.sm.secondary.bb-secondary {
+  height: 30px !important; min-height: 30px !important; padding: 0 14px !important;
+  font-size: 11.5px !important; font-weight: 500 !important; letter-spacing: .12em !important;
+  background: transparent !important; border: 1px solid var(--bb-line) !important;
+  color: var(--bb-ink2) !important;
+}
+.bb-actionbar button.sm.secondary:hover,
+button.sm.secondary.bb-secondary:hover {
+  border-color: var(--bb-line2) !important; color: var(--bb-ink) !important;
+  background: transparent !important;
+}
+.bb-actionbar button.sm.stop {
+  height: 30px !important; min-height: 30px !important; padding: 0 10px !important;
+  font-size: 11.5px !important; font-weight: 500 !important; letter-spacing: .10em !important;
+  background: transparent !important; border: 1px solid transparent !important;
+  color: var(--bb-ink3) !important; box-shadow: none !important;
+}
+.bb-actionbar button.sm.stop:hover {
+  color: var(--bb-ink) !important; background: transparent !important;
+  border-color: transparent !important;
+}
+/* tool rows: content-width, quiet, border on hover only */
+.bb-tools { align-items: center !important; gap: 8px !important; flex-wrap: wrap !important; }
+.bb-tools > * { flex: 0 0 auto !important; width: auto !important; min-width: 0 !important; }
+.bb-tools button.sm {
+  background: transparent !important; border: 1px solid transparent !important;
+  color: var(--bb-ink3) !important;
+}
+.bb-tools button.sm:hover {
+  border-color: var(--bb-line) !important; color: var(--bb-ink) !important;
+  background: transparent !important;
+}
+.bb-tools button.sm.stop { color: var(--bb-ink3) !important; }
+.bb-tools button.sm.stop:hover {
+  color: var(--bb-danger) !important; border-color: var(--bb-danger) !important;
+}
+/* the destructive confirmation is the only solid danger in the UI */
+button.sm.stop.bb-danger-solid {
+  background: var(--bb-danger) !important; border-color: var(--bb-danger) !important;
+  color: var(--bb-primary-fg) !important;
+}
+button.sm.stop.bb-danger-solid:hover { filter: brightness(1.08); }
+/* scrollbar / selection */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--bb-line); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bb-line2); }
+::-webkit-scrollbar-track { background: transparent; }
+::selection { background: var(--bb-ink); color: var(--bb-field); }
+/* flatten upload widgets into button-like controls */
+button.upload-button { text-transform: uppercase !important; letter-spacing: .08em !important; }
+/* tables */
+table { border-color: var(--bb-line) !important; }
+/* selected radio/checkbox chips: the inner span must not inherit muted meta ink */
+.gradio-container label.selected {
+  background: var(--bb-chip-bg) !important;
+  border-color: var(--bb-chip-bg) !important;
+}
+.gradio-container label.selected,
+.gradio-container label.selected span { color: var(--bb-chip-fg) !important; }
+/* choice chips (radio/checkbox options): match the label scale of the UI */
+.gradio-container label[data-testid$="-radio-label"],
+.gradio-container label[data-testid$="-checkbox-label"] { padding: 5px 10px !important; }
+.gradio-container label[data-testid$="-radio-label"] span,
+.gradio-container label[data-testid$="-checkbox-label"] span {
+  font-size: 11.5px !important; letter-spacing: .04em !important; text-transform: uppercase;
+}
+/* SCORE VIEW (abcjs) */
+.bb-score-title {
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bb-ink3); margin: 2px 0 6px;
+}
+.bb-score-panel {
+  display: block !important;
+  margin-top: 2px; border: 1px solid var(--bb-line); border-radius: 8px;
+  background: var(--bb-panel); padding: 14px 10px; min-height: 96px;
+  max-height: 460px !important; overflow: auto !important;
+}
+.bb-score-inner { display: block; }
+.bb-score-inner svg { max-width: 100%; }
+.bb-score-panel svg { max-width: 100%; height: auto; }
+.bb-score-empty, .bb-score-error {
+  color: var(--bb-ink3); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 8px 4px;
+}
+.bb-score-error { color: var(--bb-ink2); }
+/* remove Gradio's glow / shadows */
+.gradio-container * { box-shadow: none !important; }
+/* inline code / pre: dark ground with a thin stroke, never a light block */
+.prose code, .md code, code {
+  background: var(--bb-well) !important; color: var(--bb-ink) !important;
+  border: 1px solid var(--bb-line) !important; border-radius: 4px;
+  padding: 1px 5px; font-size: .92em;
+}
+.prose pre, pre {
+  background: var(--bb-well) !important; border: 1px solid var(--bb-line) !important;
+  border-radius: 8px; color: var(--bb-ink2) !important;
+}
+/* Gradio paints .form with --border-color-primary to fake a 1px frame; make it
+   transparent so the 10px layout gaps do not show a solid colour band */
+.form { background: transparent !important; }
+.bb-group { border: 1px solid var(--bb-line) !important; border-radius: 10px !important; }
+#bb-files { max-height: 200px; overflow: auto; }
+/* “E” button: drops the repository example into STYLE / LYRICS */
+.bb-eg-host { position: relative !important; }
+.bb-eg-host textarea { padding-right: 36px !important; }
+.bb-eg { position: absolute; top: 6px; right: 6px; z-index: 5; width: 20px; height: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--bb-ink3); border-radius: 4px; background: var(--bb-panel);
+  color: var(--bb-ink3); font: inherit; font-size: 10px; letter-spacing: 0;
+  line-height: 1; cursor: pointer; padding: 0; }
+.bb-eg:hover { color: var(--bb-ink); border-color: var(--bb-ink); }
+@media (hover: none) and (pointer: coarse) {
+  .bb-eg { width: 24px; height: 24px; font-size: 11px; }
+  .bb-pback, .bb-pbtn, .bb-pend { width: 26px; height: 26px; }
+  .bb-pjump { width: 40px; height: 26px; font-size: 10.5px; }
+  /* touch targets stay comfortable even at the ops scale */
+  button.sm { height: 32px !important; min-height: 32px !important; }
+}
+/* static footnote-style notes (matches the sub-label / footer scale, not body text) */
+.bb-note p { font-size: 11px !important; line-height: 1.55; letter-spacing: .04em;
+  color: var(--bb-ink3) !important; margin: 0 0 4px; }
+.bb-note code { font-size: 10.5px !important; }
+.bb-note { margin-top: 2px; }
+/* the environment status is a hint, not content: same scale as the note below it */
+#bb-env-status textarea { font-size: 11.5px !important; line-height: 1.55 !important;
+  letter-spacing: .04em; color: var(--bb-ink3) !important; }
+/* current work: a factual one-line band above the view, fed by a hidden
+   bridge that the client mirrors to localStorage (per browser, not per server) */
+#bb-current-work { display: none !important; }
+/* the view bridge is a hidden Textbox too: the view itself is an <html> class */
+#bb-view { display: none !important; }
+/* the band and the busy banner are gr.HTML blocks that are usually empty;
+   Gradio still pads the empty .html-container 12px top and bottom, which
+   stacked to a blank 88px band under the header.  The band / banner carry
+   their own padding and margin-bottom, so the wrapper needs none. */
+#bb-current-band-wrap .html-container, #bb-busy-wrap .html-container { padding: 0 !important; }
+#bb-current-band {
+  display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline;
+  border: 1px solid var(--bb-line); border-radius: 8px; background: var(--bb-panel);
+  padding: 7px 12px; margin-bottom: 10px;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--bb-ink2);
+}
+#bb-current-band b { color: var(--bb-ink); font-weight: 500; }
+
+/* ── SONG / STUDIO views ────────────────────────────────────────────────
+   Both roots stay mounted in Gradio (visible=True) and one is hidden with a
+   class on <html>.  Remounting them would redraw the score SVG and reset the
+   player (see docs/VIEW_SWITCH_PREFLIGHT.md). */
+html.bb-view-song #bb-studio-root { display: none !important; }
+html.bb-view-studio #bb-song-root { display: none !important; }
+#bb-song-root { display: block; min-height: 200px; }
+/* the view toggle is chrome, the same weight as the theme / rail buttons.
+   The buttons sit flat in #bb-topbtns (a Row inside a Row makes Gradio stretch
+   them to its 160px min-width and wrap); the elem_id is on the <button>. */
+#bb-topbtns { flex-wrap: nowrap !important; }
+#bb-topbtns .bb-view-label {
+  font-size: 10px; letter-spacing: .14em; color: var(--bb-ink4);
+  text-transform: uppercase; white-space: nowrap; margin-right: 2px;
+}
+#bb-view-song-btn, #bb-view-studio-btn {
+  min-width: 0 !important; width: auto !important; flex: 0 0 auto !important;
+  padding: 4px 9px !important; font-size: 10px !important;
+  letter-spacing: .12em !important; line-height: 1.4;
+  color: var(--bb-ink3) !important; border-color: var(--bb-line) !important;
+  background: transparent !important;
+}
+#bb-view-song-btn:hover, #bb-view-studio-btn:hover { color: var(--bb-ink) !important; }
+#bb-view-song-btn.bb-active, #bb-view-studio-btn.bb-active {
+  color: var(--bb-ink) !important; border-color: var(--bb-line2) !important;
+  background: var(--bb-lift) !important;
+}
+/* SONG: empty state */
+#bb-song-empty {
+  border: 1px solid var(--bb-line); border-radius: 12px; background: var(--bb-panel);
+  padding: 26px 22px 28px;
+}
+#bb-song-empty .bb-song-lead {
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--bb-ink3);
+}
+#bb-song-empty h2 {
+  margin: 12px 0 6px; font-size: 20px; font-weight: 600; letter-spacing: .04em;
+  color: var(--bb-ink);
+}
+#bb-song-empty p.bb-song-sub { font-size: 12px; color: var(--bb-ink3); margin: 0 0 6px; }
+#bb-song-cards { gap: 10px !important; align-items: stretch !important; margin-top: 18px; }
+#bb-song-cards .bb-song-card {
+  border: 1px solid var(--bb-line) !important; border-radius: 10px !important;
+  background: var(--bb-field) !important; padding: 14px 16px 12px !important;
+  display: flex !important; flex-direction: column !important; justify-content: space-between !important;
+  gap: 10px !important;
+}
+#bb-song-cards .bb-card-title {
+  font-size: 13px; font-weight: 600; letter-spacing: .06em; color: var(--bb-ink);
+  text-transform: uppercase;
+}
+#bb-song-cards .bb-card-sub {
+  font-size: 11px; letter-spacing: .04em; color: var(--bb-ink3); margin-top: 4px;
+}
+#bb-song-cards .bb-song-card button { width: 100% !important; }
+/* SONG: current work */
+#bb-song-work { gap: 12px; }
+#bb-song-identity {
+  border: 1px solid var(--bb-line); border-radius: 12px; background: var(--bb-panel);
+  padding: 18px 20px 16px;
+}
+#bb-song-identity .bb-song-title {
+  font-size: 18px; font-weight: 600; letter-spacing: .04em; color: var(--bb-ink);
+  margin: 0 0 8px; overflow-wrap: anywhere;
+}
+#bb-song-identity .bb-song-meta {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--bb-ink3);
+}
+#bb-song-identity .bb-song-meta b { color: var(--bb-ink2); font-weight: 500; }
+#bb-song-stage {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  border: 1px solid var(--bb-line); border-radius: 10px; background: var(--bb-panel);
+  padding: 10px 12px;
+}
+#bb-song-stage .bb-stage {
+  border: 1px solid var(--bb-line); border-radius: 6px; padding: 5px 10px;
+  font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--bb-ink4);
+}
+#bb-song-stage .bb-stage-past { color: var(--bb-ink3); border-color: var(--bb-line); }
+#bb-song-stage .bb-stage-current {
+  color: var(--bb-primary-fg); background: var(--bb-primary-bg);
+  border-color: var(--bb-primary-bg); font-weight: 600;
+}
+#bb-song-stage .bb-stage-sep { color: var(--bb-ink4); font-size: 11px; }
+#bb-song-actions { gap: 8px; }
+#bb-song-actions button { text-transform: uppercase !important; letter-spacing: .08em !important; }
+#bb-song-player { margin-top: 2px; }
+#bb-song-score { border: 1px solid var(--bb-line); border-radius: 10px; background: var(--bb-panel);
+  padding: 12px 14px; }
+#bb-song-family { border: 1px solid var(--bb-line); border-radius: 10px; background: var(--bb-panel);
+  padding: 12px 14px; }
+#bb-song-family .bb-family-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+#bb-song-family .bb-family-item { font-size: 11.5px; color: var(--bb-ink2); }
+#bb-song-family .bb-family-item b { color: var(--bb-ink); font-weight: 500; }
+#bb-song-family .bb-family-rel { color: var(--bb-ink3); letter-spacing: .04em; }
+#bb-song-family .bb-family-hit { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+#bb-song-family .bb-family-hit.bb-family-active { color: var(--bb-ink2); }
+
+/* global busy banner */
+#bb-busy {
+  border: 1px solid var(--bb-line2); border-radius: 8px; padding: 7px 12px; margin-bottom: 10px;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--bb-ink2);
+  background: var(--bb-panel);
+}
+
+/* footer credit link */
+#bb-footer a {
+  color: var(--bb-ink2) !important; text-decoration: underline; text-underline-offset: 3px;
+}
+#bb-footer a:hover { color: var(--bb-ink) !important; }
+
+/* listening comparison link */
+#bb-compare-link a,
+#bb-allmodes-link a {
+  display: inline-block; margin-top: 4px; color: var(--bb-ink) !important;
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+/* collapsible ABC source (component stays in the DOM so SCORE VIEW can read it) */
+.bb-fold {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; margin-left: 6px;
+  border: 1px solid var(--bb-ink3); border-radius: 3px;
+  font-size: 9px; line-height: 1; color: var(--bb-ink3);
+  cursor: pointer; user-select: none;
+}
+.bb-fold:hover { color: var(--bb-ink); border-color: var(--bb-ink); }
+.bb-folded .input-container {
+  max-height: 0 !important; overflow: hidden !important; min-height: 0 !important;
+}
+/* the ABC source keeps a scrollable body even if Gradio measured it while folded */
+#bb-abc-source textarea { overflow-y: auto !important; max-height: 420px !important; }
+/* disabled action buttons while a job is running */
+button:disabled, button[disabled] { opacity: .4 !important; cursor: not-allowed !important; }
+/* ⓘ parameter tips: icon + one global floating layer (immune to component overflow/stacking) */
+.bb-i {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 13px; height: 13px; margin-left: 6px; vertical-align: middle;
+  border: 1px solid var(--bb-ink3); border-radius: 50%;
+  font-size: 9px; line-height: 1; color: var(--bb-ink3); font-style: normal;
+  letter-spacing: 0; text-transform: none; cursor: help; user-select: none;
+}
+.bb-i:hover, .bb-i:focus-visible { color: var(--bb-ink); border-color: var(--bb-ink); outline: none; }
+#bb-tip {
+  position: fixed; left: 0; top: 0; z-index: 2147483000; display: none;
+  max-width: min(320px, calc(100vw - 16px)); padding: 10px 12px; pointer-events: none;
+  border: 1px solid var(--bb-line); border-radius: 8px;
+  background: var(--bb-panel); color: var(--bb-ink2);
+  font-size: 11px; line-height: 1.55; letter-spacing: .02em;
+  text-transform: none; white-space: normal;
+}
+#bb-tip.bb-tip-show { display: block; }
+
+/* ── ADVANCED // SAMPLING dual view (knobs default / sliders) ─────────────
+   Knobs are a view layer over the same 14 gr.Slider inputs: Gradio keeps the
+   number + range inputs in the DOM as the single source of truth (component
+   state, BUDGET PRESET, RESET DEFAULTS, generation) and sampling-knobs.js
+   paints a knob beside them. Every knobs-mode rule hangs off `.bb-view-knobs`,
+   which only the script sets: with no script the panel is plain sliders, never
+   an empty accordion. Gradio 6 renders a phase as
+   `.bb-sampling-phase > .styler > (.block header, .form sliders)`, so knobs
+   mode reduces each slider block to its `.bb-knob` child and lays the phase
+   `.form` out as a 7-column grid. Sliders mode is the untouched native layout. */
+.bb-knob {
+  display: none; flex-direction: column; align-items: center; gap: 6px;
+  user-select: none; -webkit-user-select: none; cursor: ns-resize;
+  touch-action: none; color: var(--bb-ink);
+}
+#bb-sampling-panel.bb-view-knobs .bb-knob { display: flex; }
+#bb-sampling-panel.bb-view-knobs .bb-sampling-phases {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 18px !important;
+}
+/* open layout under the knob view: Gradio's group ground/border is only visible
+   because the native sliders used to cover it, and the mockup wants the knobs
+   on the page itself (sliders mode keeps the cards untouched) */
+#bb-sampling-panel.bb-view-knobs .bb-sampling-phase {
+  width: 100% !important;
+  min-width: 0 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+#bb-sampling-panel.bb-view-knobs .bb-sampling-phase .styler {
+  background: transparent !important;
+}
+/* mockup typography: phase heading reads as a quiet row label, not a bold
+   group title (sliders mode keeps Gradio's group heading). The filled tag
+   lifts it off the knob labels underneath and gets a little breathing room. */
+#bb-sampling-panel.bb-view-knobs .bb-sampling-phase .styler > .block {
+  margin-bottom: 8px !important;
+}
+#bb-sampling-panel.bb-view-knobs .bb-sampling-phase .prose strong {
+  font-weight: 400;
+  color: var(--bb-ink) !important;
+  background: var(--bb-line) !important;
+  border-radius: 4px;
+  padding: 2px 8px;
+  letter-spacing: .06em;
+}
+#bb-sampling-panel.bb-view-knobs .bb-sampling-phase .form {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 12px 8px !important;
+  align-items: start !important;
+}
+/* in knobs mode a slider block is only a knob host; the native chrome (label,
+   number field, range, reset) stays in the DOM for Gradio but paints nothing */
+#bb-sampling-panel.bb-view-knobs .bb-sampling-slider {
+  min-width: 0 !important; width: 100% !important;
+  padding: 0 !important; border: none !important; box-shadow: none !important;
+  background: transparent !important; overflow: visible !important;
+}
+#bb-sampling-panel.bb-view-knobs .bb-sampling-slider > :not(.bb-knob) {
+  display: none !important;
+}
+.bb-knob-label {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--bb-ink2); text-align: center; line-height: 1.2;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bb-knob-body {
+  position: relative; width: 88px; height: 88px;
+  display: flex; align-items: center; justify-content: center;
+}
+.bb-knob-svg { display: block; width: 88px; height: 88px; overflow: visible; }
+.bb-knob-arc {
+  fill: none; stroke: var(--bb-line2); stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.bb-knob-dot { fill: var(--bb-primary-bg); stroke: none; }
+.bb-knob-value {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; pointer-events: none;
+  font-size: 12px; font-weight: 600; letter-spacing: .02em;
+  color: var(--bb-ink); font-variant-numeric: tabular-nums;
+}
+.bb-knob:hover .bb-knob-arc, .bb-knob:focus-visible .bb-knob-arc { stroke: var(--bb-ink2); }
+.bb-knob.bb-knob-active .bb-knob-dot { fill: var(--bb-ink); }
+.bb-knob.bb-knob-active .bb-knob-arc { stroke: var(--bb-ink2); }
+.bb-knob.bb-knob-active { cursor: ns-resize; }
+html.bb-knob-dragging, html.bb-knob-dragging body {
+  cursor: ns-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  overscroll-behavior: none;
+}
+html.bb-knob-dragging { touch-action: none; }
+
+/* the view switch lives at the right end of the duration line, just above the
+   phases it controls; the row is centred so the icon rides the text midline */
+#bb-sampling-panel .bb-sampling-viewbar { align-items: center !important; }
+
+/* view toggle: CSS icon of the scene on screen (knob ↔ fader bars), same
+   grammar as the theme/rail buttons; the title says what the click gives */
+#bb-sampling-view-btn {
+  position: relative; width: 28px !important; height: 27px; min-width: 28px !important;
+  padding: 0 !important; color: var(--bb-ink3) !important; flex: 0 0 auto !important;
+}
+#bb-sampling-view-btn:hover { color: var(--bb-ink) !important; }
+#bb-sampling-view-btn:not(.bb-showing-knobs):not(.bb-showing-sliders) { visibility: hidden; }
+/* knobs showing: dial ring + head dot (click for the sliders) */
+#bb-sampling-view-btn.bb-showing-knobs::before {
+  content: ""; position: absolute; left: 7px; top: 7px; width: 12px; height: 12px;
+  border: 1px solid currentColor; border-radius: 50%;
+  background: radial-gradient(circle at 72% 28%, currentColor 0 1.6px, transparent 1.7px);
+  box-shadow: none;
+}
+/* sliders showing: three fader bars (click for the knobs) */
+#bb-sampling-view-btn.bb-showing-sliders::before {
+  content: ""; position: absolute; left: 8px; top: 8px; width: 12px; height: 11px;
+  background:
+    linear-gradient(currentColor, currentColor) 0 0 / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 5px / 100% 1px no-repeat,
+    linear-gradient(currentColor, currentColor) 0 10px / 100% 1px no-repeat;
+}
+@media (max-width: 1000px) {
+  #bb-sampling-panel.bb-view-knobs .bb-sampling-phase .form {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 620px) {
+  #bb-sampling-panel.bb-view-knobs .bb-sampling-phase .form {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* ── phones ──────────────────────────────────────────────────────────────
+   Everything below is inside <main class="contain">, so these @media rules
+   survive prefix_css (the frame itself is handled above, and the tab strip
+   by the container query in LAYOUT_HEAD_CSS).  Below 700px the theme button,
+   normally absolute over the title, parks in its own row, and the action
+   bars wrap instead of running off the screen. */
+@media (max-width: 700px) {
+  .bb-actionbar, .bb-tools { flex-wrap: wrap !important; }
+  .bb-actionbar .bb-push-right { margin-left: 0 !important; }
+  #bb-header { padding: 16px 12px 12px; contain: inline-size; }
+  #bb-header h1 { font-size: 18px; margin: 8px 0 6px; overflow-wrap: anywhere; }
+  /* phones: rail toggle + theme button share one row */
+  #bb-topbtns { position: static !important; inset: auto !important;
+                width: 100% !important; margin: 0 0 10px 0 !important; }
+  #bb-topbtns > * { flex: 0 0 auto !important; }
+  #bb-rail-btn { width: 46px !important; min-width: 46px !important; height: 32px; }
+  #bb-theme-btn { flex: 0 0 auto !important; width: 46px !important; min-width: 46px !important;
+                  height: 32px; margin: 0 !important; }
+  .bb-score-panel { max-height: 60vh !important; }
+}
+@media (max-width: 360px) { #bb-header h1 { font-size: 16px; } }
+
+/* ── tablets / narrow laptops ────────────────────────────────────────────
+   Below ~1024px the two-column workspace would squeeze the main column; the
+   settings rail wraps underneath instead. */
+@media (max-width: 1024px) {
+  .bb-workspace { flex-wrap: wrap !important; }
+  .bb-workspace #bb-rail { flex-basis: 100% !important; min-width: 0 !important; }
+}
+
+/* ── touch devices ────────────────────────────────────────────────────────
+   16px inputs stop iOS Safari from zooming the page on focus; the ⓘ and the
+   ABC fold control get real touch targets. */
+@media (hover: none) and (pointer: coarse) {
+  /* 16px stops iOS Safari zooming on focus — but only a field that can take
+     focus needs it.  Gradio renders output/status boxes as disabled, so they
+     keep the desktop 13px instead of jumping to 16px. */
+  input:not([disabled]):not([readonly]),
+  textarea:not([disabled]):not([readonly]),
+  select:not([disabled]) { font-size: 16px !important; }
+  .bb-i { width: 20px !important; height: 20px !important; }
+  .bb-fold { width: 22px !important; height: 22px !important; font-size: 12px !important; }
+}
