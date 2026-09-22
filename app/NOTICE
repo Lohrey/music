@@ -1,0 +1,34 @@
+YUE2 // GROOVE
+Copyright 2026 DEADJOE
+
+This product is an unofficial front end for YuE2 and is not affiliated with the
+YuE2 authors. Model weights are distributed separately under CC BY-NC 4.0
+(non-commercial) by the YuE2 project; this repository ships no weights.
+
+This product includes software developed by the YuE2 project
+(https://github.com/multimodal-art-projection/YuE), licensed under the
+Apache License, Version 2.0. The files below are byte-identical copies taken at
+upstream tag yue2-v0.1.6 (commit 9c6c4b3):
+  - yue2_groove/vendor/abc_tools.py   (from skills/yue2-music/scripts/abc_tools.py)
+  - yue2_groove/vendor/listen.py      (from skills/yue2-music/scripts/listen.py)
+  - yue2_groove/examples/melody.abc   (from examples/melody.abc)
+
+This product includes software from yue2.cpp (https://github.com/ServeurpersoCom/yue2.cpp),
+Copyright (c) 2023-2026 The yue2.cpp authors, MIT License:
+  - yue2_groove/vendor/yue2cpp_convert.py   (byte-identical copy of convert.py at commit e8b39f7)
+The yue2.cpp binaries the optional GGUF engine runs are built from that commit by
+.github/workflows/yue2cpp.yml and distributed as release assets with yue2.cpp's LICENSE inside.
+
+This product includes abcjs (https://github.com/paulrosen/abcjs),
+Copyright (c) 2009-2024 Paul Rosen and Gregory Dyke, MIT License;
+see yue2_groove/static/abcjs.LICENSE.
+
+The file yue2_groove/sheetsage_driver.py is adapted from the YuE2 project's
+skills/yue2-music/scripts/transcribe.py (Apache License, Version 2.0,
+Copyright (c) 2026 the YuE2 authors). It is rewritten to run inside a separate
+SheetSage2 virtual environment and is invoked as a subprocess.
+
+SheetSage2 (m-a-p/SheetSage2) and its parent encoder MERT-v2-FullSong
+(m-a-p/MERT-v2-FullSong) are optional models downloaded at runtime for the
+06 COVER tab. Their weights are licensed CC BY-NC 4.0 (non-commercial); no
+model weights are shipped in this repository.

@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "yue2-groove"
+version = "1.0.3"
+description = "YUE2 // GROOVE: an unofficial Gradio web UI for YuE2 song generation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+keywords = ["yue2", "music-generation", "gradio", "web-ui", "apple-silicon", "mps"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Sound Synthesis",
+]
+# The YuE2 runtime itself (`yue2-infer`) is not on PyPI; install it from a clone of
+# https://github.com/multimodal-art-projection/YuE into the same environment (see README),
+# or use the `yue2` extra below to pull a pinned tag straight from GitHub.
+dependencies = [
+    "gradio>=6,<7",
+    "numpy",
+    "soundfile",
+    "torch",
+]
+
+[project.optional-dependencies]
+yue2 = ["yue2-infer @ git+https://github.com/multimodal-art-projection/YuE@yue2-v0.1.6"]
+# the GGUF engine converts the checkpoints with yue2.cpp's converter (vendored), which
+# needs the gguf writer; the binaries themselves come from the release assets
+gguf = ["gguf>=0.10"]
+test = ["pytest>=8", "ruff>=0.16,<0.17", "pyright>=1.1.400,<2"]
+
+[project.urls]
+Repository = "https://github.com/deadjoe/yue2_groove"
+Upstream = "https://github.com/multimodal-art-projection/YuE"
+
+[project.scripts]
+yue2-groove = "yue2_groove.webui:main"
+
+[tool.setuptools.packages.find]
+include = ["yue2_groove*"]
+
+[tool.setuptools.package-data]
+yue2_groove = ["static/*", "examples/*.abc", "vendor/*.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# One lint gate for CI and local runs: `.venv/bin/ruff check .`
+# vendor/ is an upstream byte-identical copy (see NOTICE) and static/ ships JS;
+# both are excluded so lint can never rewrite them.
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = ["yue2_groove/vendor", "yue2_groove/static"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "RUF", "C4", "ISC", "S110", "BLE001",
+          "B", "SIM", "PIE", "RET", "PERF", "PLC", "PLE", "PLW", "T20"]
+# RUF001-003: the UI copy intentionally uses typographic dashes;
+# RUF005: explicit list concatenation in the Gradio wiring reads better than splats;
+# B008: `progress=gr.Progress()` is how Gradio injects the progress tracker;
+# SIM117: nested `with gr.Row(): with gr.Column():` IS the layout tree;
+# PLC0415: adapter.py imports `yue2` lazily on purpose (the UI must import without it);
+# PLW0603: the pipeline / worker singletons are module state by design;
+# PERF203: a try inside a loop is the per-line protocol of the SheetSage2 driver.
+ignore = ["RUF001", "RUF002", "RUF003", "RUF005", "B008", "SIM117", "PLC0415", "PLW0603",
+          "PERF203"]
+
+[tool.ruff.lint.per-file-ignores]
+# stdout is the protocol of the driver (JSON lines to the parent) and of the scripts
+"yue2_groove/sheetsage_driver.py" = ["T201"]
+"scripts/*" = ["T201"]
+"deploy/*" = ["T201"]
+"tests/*" = ["T201"]

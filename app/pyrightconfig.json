@@ -1,0 +1,9 @@
+{
+  "include": ["yue2_groove"],
+  "exclude": ["yue2_groove/vendor", "yue2_groove/static"],
+  "typeCheckingMode": "basic",
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.10",
+  "pythonPlatform": "Linux"
+}

@@ -1,0 +1,27 @@
+# virtual environments and Python cruft
+.venv*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# local configuration and generated works
+.env
+runs/
+runs*/
+models/
+*.log
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/
+
+# local scores you keep next to the runs
+scores/
+
+# yue2.cpp binaries for the GGUF engine (release assets; `python -m yue2_groove.gguf_engine install`)
+bin/

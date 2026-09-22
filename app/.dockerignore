@@ -1,0 +1,21 @@
+# Only the app source, its packaging and the deploy scripts go into the image.
+.git
+.github
+.venv*
+env
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+*.egg-info
+build
+dist
+.env
+runs
+runs*
+models
+bin
+scores
+*.log
+docs/images
+.DS_Store
