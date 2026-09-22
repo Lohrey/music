@@ -1,0 +1,27 @@
+# Musik machen – Einstellungen
+# Die Installation legt daraus "einstellungen.txt" an. Nur die Datei einstellungen.txt bearbeiten.
+# Zeilen mit # am Anfang sind abgeschaltet.
+
+# ── Handy-Zugang über das Internet (ngrok) ──
+# Token von https://dashboard.ngrok.com  (kostenlos)
+#NGROK_AUTHTOKEN=
+# feste Adresse (Dashboard -> Domains), z. B. xyz.ngrok-free.dev
+#NGROK_DOMAIN=
+# ohne Passwort öffentlich erreichbar (1 = ja)
+YUE2_PUBLIC_NO_PASSWORD=1
+# oder mit Passwort:  benutzer:passwort
+#YUE2_GROOVE_AUTH=
+
+# ── PC wach halten (für Cloud-PCs wie Shadow; 1 = an) ──
+YUE2_KEEP_AWAKE=0
+
+# ── Songtexte automatisch schreiben lassen (optional, Anthropic-API-Schlüssel) ──
+#ANTHROPIC_API_KEY=
+
+# ── Technik (normalerweise nicht ändern) ──
+MUSIK_PORT=42003
+# 127.0.0.1 = nur dieser PC (+ Handy über ngrok);  0.0.0.0 = auch im Heimnetz
+MUSIK_HOST=127.0.0.1
+# YuE2-Motor: auto | gguf | torch     GGUF-Gerät: auto | vulkan
+YUE2_GROOVE_BACKEND=auto
+YUE2_GROOVE_GGUF_DEVICE=auto

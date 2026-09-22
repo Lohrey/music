@@ -1,0 +1,23 @@
+# private Einstellungen (Tokens!) – nie hochladen
+einstellungen.txt
+handy-zugang.txt
+.env
+
+# Installationen, Modelle, Songs, Backups
+app/env/
+app/.venv*/
+app/models/
+app/runs/
+app/bin/
+ace-step/
+Backups/
+*.egg-info/
+__pycache__/
+*.py[cod]
+*.log
+
+# Android-Build
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
