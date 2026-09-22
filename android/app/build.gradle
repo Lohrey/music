@@ -1,0 +1,24 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'de.paul.yuemusik'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'de.paul.yuemusik'
+        minSdk 24
+        targetSdk 34
+        versionCode 2
+        versionName '1.1'
+    }
+    signingConfigs {
+        release {
+            storeFile file('../yuemusik.keystore')
+            storePassword 'yuemusik'
+            keyAlias 'yuemusik'
+            keyPassword 'yuemusik'
+        }
+    }
+    buildTypes {
+        release { minifyEnabled true; shrinkResources true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'); signingConfig signingConfigs.release }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
