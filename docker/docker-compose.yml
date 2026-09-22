@@ -1,0 +1,19 @@
+services:
+  musik-machen:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "42003:42003"
+    volumes:
+      - musik-daten:/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+volumes:
+  musik-daten:
