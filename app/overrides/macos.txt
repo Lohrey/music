@@ -1,0 +1,11 @@
+# uv override file for Apple Silicon (macOS), used as
+#   uv pip install -e . --overrides overrides/macos.txt
+#
+# torch >= 2.11 fixes pytorch/pytorch#174861 (MPS single-query SDPA reads out of
+# bounds once the KV cache passes 1024 tokens; nondeterministic values and NaN in
+# bfloat16/float16).  Upstream YuE2 pins torch==2.10.0, which has the defect.
+# scripts/mps_sdpa_check.py verifies the installed torch in a few seconds.
+torch==2.14.0
+# Gradio asks for huggingface-hub >= 1.16 while YuE2 pins 0.36.2 (transformers 4.57.x
+# does not work with hub 1.x).  Keep upstream's pin; Gradio works fine with it.
+huggingface-hub==0.36.2

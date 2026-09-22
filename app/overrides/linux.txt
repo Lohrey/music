@@ -1,0 +1,7 @@
+# uv override file for Linux / NVIDIA CUDA, used as
+#   uv pip install -e . --overrides overrides/linux.txt
+#
+# torch stays at upstream's validated pin (2.10.0); the MPS defect does not affect CUDA.
+# Gradio asks for huggingface-hub >= 1.16 while YuE2 pins 0.36.2 (transformers 4.57.x
+# does not work with hub 1.x).  Keep upstream's pin; Gradio works fine with it.
+huggingface-hub==0.36.2
