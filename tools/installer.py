@@ -427,7 +427,7 @@ def cmd_install(args) -> None:
 
 def cmd_start(args) -> None:
     cfg = read_settings()
-    port = int(cfg.get("MUSIK_PORT") or args.port or DEFAULT_PORT)
+    port = int(args.port or cfg.get("MUSIK_PORT") or DEFAULT_PORT)
     host = args.host or cfg.get("MUSIK_HOST") or "127.0.0.1"
     p = py(APP / "env")
     if not p.is_file():
