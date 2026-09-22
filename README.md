@@ -87,7 +87,7 @@ Linux ohne Docker: `./installieren.sh` und `./starten.sh`.
 app/            die App (Python-Paket yue2_groove, Oberfläche in yue2_groove/webui/simple_ui.py)
   runs/         deine Songs (nicht im Repo)
 ace-step/       ACE-Step 1.5 (wird installiert, nicht im Repo)
-android/        Handy-App: Quellcode, fertige APK und Signatur-Schlüssel (für App-Updates)
+android/        Handy-App: Quellcode und fertige APK (Signatur-Schlüssel liegt separat, nicht im Repo)
 docker/         Docker für Cloud-GPUs
 tools/          installer.py – macht Installation, Start, Update, Backup
 ```
