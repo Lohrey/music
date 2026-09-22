@@ -13,7 +13,7 @@ YUE2_PUBLIC_NO_PASSWORD=1
 #YUE2_GROOVE_AUTH=
 
 # ── PC wach halten (für Cloud-PCs wie Shadow; 1 = an) ──
-YUE2_KEEP_AWAKE=0
+YUE2_KEEP_AWAKE=1
 
 # ── Songtexte automatisch schreiben lassen (optional, Anthropic-API-Schlüssel) ──
 #ANTHROPIC_API_KEY=
